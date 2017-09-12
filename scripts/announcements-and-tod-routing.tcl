@@ -1,4 +1,4 @@
-# ivr.tcl
+# announcements-and-tod-routing.tcl
 # Script Version 1.0
 #------------------------------------------------------------------ 
 # 
@@ -6,9 +6,9 @@
 # *** Script Overview ***
 # ***********************
 #
-# This script provides simple handling for IOS-based IVRs, providing much of the basic IVR functionality
-# available in Unity Connection.  It's intended use is to support early media requirements, or
-# for remote sites where a central server solution is not avaialble or where IVR functionality
+# This script provides simple handling for IOS-based annoucmenets, providing much of the basic AA functionality
+# schedule capabilities available in Unity Connection.  It's intended use is to support early media requirements,
+# or for remote sites where a central server solution is not avaialble or where IVR functionality
 # is critical during SRST.
 # 
 # The script supports the following scenarios for call routing, custom prompts and custom
@@ -43,6 +43,7 @@
 # etc.
 #
 # Holidays and time schedules can be updated WITHOUT needing to reload the Tcl script.
+# For ease of use for remote sessions, these can be written to flash using the IOS tclsh. 
 # 
 #------------------------------------------------------------------
 # 
