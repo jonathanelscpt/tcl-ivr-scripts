@@ -258,9 +258,14 @@ proc getActiveCallArray {} {
 
 proc playEarlyMedia { prompt dnis } {
 
+    # store ani as workaround for empty "leg setup" call_leg
+    set ani [infotag get leg_ani]
+
     # leg progress leg_incoming -p 8
     leg connect leg_incoming
     media play leg_incoming $prompt
+    # set ani for callInfo as workaround
+    set callInfo(originationNum) $ani
     leg setup $dnis callInfo
     # proceed directly to outbound calling
     fsm setstate PLACECALL
@@ -317,6 +322,7 @@ proc init { } {
 proc act_Setup { } {
 
     global dnis
+    global activeCallArray
 
     puts "Entering act_Setup"
     leg setupack leg_incoming
@@ -377,14 +383,26 @@ proc act_PostPromptHandoff { } {
 
 proc act_CallSetupDone { } { 
 
+    global activeCallArray
+
     puts "Entering act_CallSetupDone"
     set status [infotag get evt_status]
 
     if { $status == "ls_000"} {
         puts "Call Setup Successful"
-        media stop leg_incoming
-        connection create leg_incoming leg_outgoing
-       # handoff appl leg_all default
+
+        switch $activeCallArray(prompt-behaviour) {
+            "early-media" {
+                media stop leg_incoming
+                connection create leg_incoming leg_outgoing
+            }
+            default {
+                handoff appl leg_all default
+            }
+        }
+        # media stop leg_incoming
+        # connection create leg_incoming leg_outgoing
+        # handoff appl leg_all default
        # act_Cleanup
     } else {
         act_Abort
