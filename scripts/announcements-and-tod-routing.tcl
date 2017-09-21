@@ -258,9 +258,10 @@ proc getActiveCallArray {} {
 
 proc playEarlyMedia { prompt dnis } {
 
-    leg progress leg_incoming -p 8
+    # leg progress leg_incoming -p 8
+    leg connect leg_incoming
     media play leg_incoming $prompt
-    leg setup $dnis callInfo leg_incoming
+    leg setup $dnis callInfo
     # proceed directly to outbound calling
     fsm setstate PLACECALL
 }
@@ -381,9 +382,10 @@ proc act_CallSetupDone { } {
 
     if { $status == "ls_000"} {
         puts "Call Setup Successful"
-        handoff appl leg_all default
-        # test with removing this direct proc call.  it should not be required...
-        act_Cleanup
+        media stop leg_incoming
+        connection create leg_incoming leg_outgoing
+       # handoff appl leg_all default
+       # act_Cleanup
     } else {
         act_Abort
     }
