@@ -376,9 +376,7 @@ proc act_PostPromptHandoff { } {
     global dnis
 
     puts "Handoff call to DNIS: $dnis"
-    # handoff callappl leg_incoming default "DESTINATION=$dnis"
     handoff appl leg_incoming default "DESTINATION=$dnis"
-    # act_Cleanup
 }
 
 proc act_CallSetupDone { } { 
@@ -393,17 +391,15 @@ proc act_CallSetupDone { } {
 
         switch $activeCallArray(prompt-behaviour) {
             "early-media" {
+                # stop media if still playing due to a quick answer
                 media stop leg_incoming
+                # connect two call legs
                 connection create leg_incoming leg_outgoing
             }
             default {
                 handoff appl leg_all default
             }
         }
-        # media stop leg_incoming
-        # connection create leg_incoming leg_outgoing
-        # handoff appl leg_all default
-       # act_Cleanup
     } else {
         act_Abort
     }
