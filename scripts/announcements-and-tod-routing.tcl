@@ -258,9 +258,15 @@ proc getActiveCallArray {} {
 
 proc playEarlyMedia { prompt dnis } {
 
-    leg progress leg_incoming -p 8
+    # store ani as workaround for empty "leg setup" call_leg
+    set ani [infotag get leg_ani]
+
+    # leg progress leg_incoming -p 8
+    leg connect leg_incoming
     media play leg_incoming $prompt
-    leg setup $dnis callInfo leg_incoming
+    # set ani for callInfo as workaround
+    set callInfo(originationNum) $ani
+    leg setup $dnis callInfo
     # proceed directly to outbound calling
     fsm setstate PLACECALL
 }
@@ -316,6 +322,7 @@ proc init { } {
 proc act_Setup { } {
 
     global dnis
+    global activeCallArray
 
     puts "Entering act_Setup"
     leg setupack leg_incoming
@@ -369,21 +376,30 @@ proc act_PostPromptHandoff { } {
     global dnis
 
     puts "Handoff call to DNIS: $dnis"
-    # handoff callappl leg_incoming default "DESTINATION=$dnis"
     handoff appl leg_incoming default "DESTINATION=$dnis"
-    # act_Cleanup
 }
 
 proc act_CallSetupDone { } { 
+
+    global activeCallArray
 
     puts "Entering act_CallSetupDone"
     set status [infotag get evt_status]
 
     if { $status == "ls_000"} {
         puts "Call Setup Successful"
-        handoff appl leg_all default
-        # test with removing this direct proc call.  it should not be required...
-        act_Cleanup
+
+        switch $activeCallArray(prompt-behaviour) {
+            "early-media" {
+                # stop media if still playing due to a quick answer
+                media stop leg_incoming
+                # connect two call legs
+                connection create leg_incoming leg_outgoing
+            }
+            default {
+                handoff appl leg_all default
+            }
+        }
     } else {
         act_Abort
     }
