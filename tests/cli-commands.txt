@@ -1,0 +1,73 @@
+
+External Dialling:
+
+012723357
+888
+
+##################################################
+
+!
+application
+ no service ivr flash:testing.tcl
+!
+dial-peer voice 888
+no service
+!
+!
+dial-peer voice 8888
+no service
+!
+
+
+
+!
+application
+ service ivr flash:testing.tcl
+  param working-hours-destination 888
+  param working-hours-prompt "flash:welcome-en.au"
+  param working-hours-prompt-behaviour early-media
+  param after-hours-destination 777
+  param after-hours-prompt "flash:welcome-en.au"
+  param after-hours-prompt-behaviour handoff
+  param midday-break-destination 777
+  param midday-break-prompt "flash:welcome-en.au"
+  param midday-break-prompt-behaviour hangup
+  param holiday-destination 666
+  param holiday-prompt "flash:welcome-en.au"
+  param holiday-prompt-behaviour hangup
+  param time-schedule-filename "flash:schedule.txt"
+  param holiday-schedule-filename "flash:holidays.txt"
+!
+dial-peer voice 888
+ service ivr
+!
+dial-peer voice 8888
+ service ivr
+!
+
+#####################
+
+un all
+deb ccsip mess
+deb voip application
+debug voip application error
+debug voip application script
+
+
+
+#####################
+
+
+service sequence-numbers
+service timestamps debug datetime localtime msec
+logging buffered 10000000 debug
+no logging console
+no logging monitor
+
+default logging rate-limit
+
+default logging queue-limit
+
+voice iec syslog
+
+##################
