@@ -44,8 +44,8 @@
 # The script can additionally be deployed with two text files, for work schedules and holidays.
 # 
 # Work schedules days should be in the below format.  The day must be fully stated.  i.e. "Friday", NOT "Fri".
-# If not configured or matched on a particular day, calls routing as if always open.  
-# Midday breaks are optional.  
+# If not configured or matched on a particular day, calls are routed as if always open.  
+# Midday breaks are optional.
 # 
 # <day-of-week> <start-time> [<break-start-time> <break-start-time>] <end-time>
 # 
