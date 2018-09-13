@@ -1,5 +1,28 @@
-# announcements-and-tod-routing.tcl
-# Script Version 1.0
+# Script Name: announcements-and-tod-routing.tcl
+# Script Version: 1.0.1
+# Created by: Jonathan Els
+#------------------------------------------------------------------
+# MIT License
+# 
+# Copyright (c) 2018 jonathanelscpt
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 #------------------------------------------------------------------ 
 # 
 # ***********************
@@ -148,7 +171,6 @@ proc isHoliday { } {
     }
     puts "Holiday schedule does not exist..."
     return 0
-    
 }
 
 proc getTimeSchedule { filename } {
@@ -164,7 +186,6 @@ proc getTimeSchedule { filename } {
         set schedule([string totitle [string trim [lindex $var 0]]]) [lrange $var 1 end]
     }
     return [array get schedule]
-
 }
 
 proc isInWorkingHours { } {
@@ -203,7 +224,6 @@ proc isInWorkingHours { } {
     # always return true if no schedule or invalid filename param supplied
     puts "No time schedule file found... Processing call as in working-hours..."
     return 1
-
 }
 
 proc createCallArray { destination prompt prompt_behaviour } {
@@ -220,7 +240,7 @@ proc createCallArray { destination prompt prompt_behaviour } {
     return [array get callArray]
 }
 
-proc getActiveCallArray {} {
+proc getActiveCallArray { } {
 
     global holidayArray
     global afterHoursArray
@@ -316,7 +336,6 @@ proc init { } {
     if {[infotag get cfg_avpair_exists holiday-schedule-filename]} {
         set holidayScheduleFilename [string trim [infotag get cfg_avpair holiday-schedule-filename]]
     }
-
 }
 
 proc act_Setup { } {
@@ -325,9 +344,24 @@ proc act_Setup { } {
     global activeCallArray
 
     puts "Entering act_Setup"
-    leg setupack leg_incoming
-    leg proceeding leg_incoming
     
+    set legState [infotag get leg_state leg_incoming]
+
+    # lg_001 --> LEG_INCOMING_FIRST
+    # lg_002 --> LEG_INCACKED
+    # lg_003 --> LEG_INCPROCEED
+    # lg_005 --> LEG_INCCONNECTED
+    # lg_008 --> LEG_OUTPROCEED
+
+    if {$legState != "lg_005" && $legState != "lg_008"} {
+        if {$legState == "lg_001"} {       
+            leg setupack leg_incoming
+            leg proceeding leg_incoming
+        } elseif {$legState == "lg_002"} {        
+            leg proceeding leg_incoming
+        }
+    }
+
     # determine required call state
     array set activeCallArray [getActiveCallArray]
     
@@ -368,7 +402,6 @@ proc act_Setup { } {
         puts "prompt and prompt-behaviour do not exist...  Routing call directly..."
         routeCallWithoutPrompt $dnis
     }
-
 }
 
 proc act_PostPromptHandoff { } {
@@ -424,13 +457,13 @@ init
 #   Finite State Machine 
 #----------------------------------
 
- set fsm(any_state,ev_disconnected) "act_Abort,same_state"
- set fsm(CALL_INIT,ev_setup_indication) "act_Setup,HANDOFF"
- set fsm(HANDOFF,ev_media_done) "act_PostPromptHandoff,PLACECALL"
- set fsm(PLACECALL,ev_setup_done) "act_CallSetupDone,CALLACTIVE"
- set fsm(CALLACTIVE,ev_disconnected) "act_Cleanup,CALLDISCONNECT"
- set fsm(CALLDISCONNECT,ev_media_done) "act_Cleanup,same_state"
- set fsm(CALLDISCONNECT,ev_disconnected) "act_Cleanup,same_state"
- set fsm(CALLDISCONNECT,ev_disconnect_done) "act_Cleanup,same_state"
+ set fsm(any_state, ev_disconnected) "act_Abort, same_state"
+ set fsm(CALL_INIT, ev_setup_indication) "act_Setup, HANDOFF"
+ set fsm(HANDOFF, ev_media_done) "act_PostPromptHandoff, PLACECALL"
+ set fsm(PLACECALL, ev_setup_done) "act_CallSetupDone, CALLACTIVE"
+ set fsm(CALLACTIVE, ev_disconnected) "act_Cleanup, CALLDISCONNECT"
+ set fsm(CALLDISCONNECT, ev_media_done) "act_Cleanup, same_state"
+ set fsm(CALLDISCONNECT, ev_disconnected) "act_Cleanup, same_state"
+ set fsm(CALLDISCONNECT, ev_disconnect_done) "act_Cleanup, same_state"
 
  fsm define fsm CALL_INIT
