@@ -457,13 +457,13 @@ init
 #   Finite State Machine 
 #----------------------------------
 
- set fsm(any_state, ev_disconnected) "act_Abort, same_state"
- set fsm(CALL_INIT, ev_setup_indication) "act_Setup, HANDOFF"
- set fsm(HANDOFF, ev_media_done) "act_PostPromptHandoff, PLACECALL"
- set fsm(PLACECALL, ev_setup_done) "act_CallSetupDone, CALLACTIVE"
- set fsm(CALLACTIVE, ev_disconnected) "act_Cleanup, CALLDISCONNECT"
- set fsm(CALLDISCONNECT, ev_media_done) "act_Cleanup, same_state"
- set fsm(CALLDISCONNECT, ev_disconnected) "act_Cleanup, same_state"
- set fsm(CALLDISCONNECT, ev_disconnect_done) "act_Cleanup, same_state"
+ set fsm(any_state,ev_disconnected) "act_Abort,same_state"
+ set fsm(CALL_INIT,ev_setup_indication) "act_Setup,HANDOFF"
+ set fsm(HANDOFF,ev_media_done) "act_PostPromptHandoff,PLACECALL"
+ set fsm(PLACECALL,ev_setup_done) "act_CallSetupDone,CALLACTIVE"
+ set fsm(CALLACTIVE,ev_disconnected) "act_Cleanup,CALLDISCONNECT"
+ set fsm(CALLDISCONNECT,ev_media_done) "act_Cleanup,same_state"
+ set fsm(CALLDISCONNECT,ev_disconnected) "act_Cleanup,same_state"
+ set fsm(CALLDISCONNECT,ev_disconnect_done) "act_Cleanup,same_state"
 
  fsm define fsm CALL_INIT
